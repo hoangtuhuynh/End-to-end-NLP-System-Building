@@ -1,0 +1,10 @@
+See README.md for full run steps and course policy (open Hugging Face models only).
+
+Summary:
+  pip install -r requirements.txt
+  python preprocess.py
+  python scripts/build_index.py
+  python scripts/answer_questions.py --questions <questions.txt> --output system_outputs\system_output.txt
+  python scripts/evaluate.py --predictions ... --references data\test\reference_answers.txt
+
+Use RAG_LLM_BACKEND=ollama (default) or RAG_LLM_BACKEND=hf with RAG_HF_MODEL and optional HF_TOKEN.
