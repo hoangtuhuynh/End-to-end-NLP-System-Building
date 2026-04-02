@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-from sentence_transformers import SentenceTransformer
 
 from rag.config import DEFAULT_JSONL, EMBED_MODEL
 
@@ -83,6 +82,8 @@ def build_vector_store(
             }
         )
 
+    from sentence_transformers import SentenceTransformer
+
     model = SentenceTransformer(EMBED_MODEL)
     embeddings = model.encode(
         texts,
@@ -108,6 +109,8 @@ def load_index(index_dir: Path | None = None) -> PolicyIndex:
     with open(corpus_path, encoding="utf-8") as f:
         payload = json.load(f)
     model_name = payload.get("embed_model", EMBED_MODEL)
+    from sentence_transformers import SentenceTransformer
+
     model = SentenceTransformer(model_name)
     embeddings = np.load(emb_path)
     return PolicyIndex(

@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from rag.config import DEFAULT_INDEX_DIR
-from rag.pipeline import answer_question, answer_question_extractive
+from rag.pipeline import answer_question, answer_question_extractive, answer_question_closed_book
 from rag.store import load_index
 
 
@@ -23,12 +23,23 @@ def main() -> None:
         action="store_true",
         help="Skip LLM; return a short snippet from the top retrieval (debug / no GPU or no LLM).",
     )
+    ap.add_argument(
+        "--closed-book",
+        action="store_true",
+        help="Closed-book baseline: run the reader model without retrieved context.",
+    )
     args = ap.parse_args()
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    index = load_index(args.index_dir)
     questions = args.questions.read_text(encoding="utf-8").splitlines()
     out_lines: list[str] = []
+    index = None
+    if not args.closed_book and not args.extractive:
+        # Full RAG needs the retrieval index.
+        index = load_index(args.index_dir)
+    elif args.extractive:
+        # Extractive baseline also needs the retrieval index.
+        index = load_index(args.index_dir)
     for i, q in enumerate(questions, start=1):
         q = q.strip()
         if not q:
@@ -37,6 +48,8 @@ def main() -> None:
         print(f"[{i}/{len(questions)}] {q[:80]}...", flush=True)
         if args.extractive:
             ans = answer_question_extractive(index, q)
+        elif args.closed_book:
+            ans = answer_question_closed_book(index, q)
         else:
             ans = answer_question(index, q)
         out_lines.append(ans.replace("\n", " ").strip())

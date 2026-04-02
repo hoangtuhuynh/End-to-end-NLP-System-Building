@@ -1,5 +1,5 @@
 from rag.config import TOP_K
-from rag.llm import generate_answer
+from rag.llm import generate_answer, generate_answer_closed_book
 from rag.store import PolicyIndex
 
 
@@ -24,3 +24,9 @@ def answer_question_extractive(index: PolicyIndex, question: str) -> str:
     doc = result.documents[0]
     snippet = doc[:400].strip()
     return snippet.split(". ")[0][:200]
+
+
+def answer_question_closed_book(index: PolicyIndex, question: str) -> str:
+    # Closed-book baseline: no retrieved context snippets.
+    _ = index  # unused; keeps signature consistent
+    return generate_answer_closed_book(question)
